@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Security.Cryptography;
 using UnityEngine;
 
-public class ButtonInteractable : MonoBehaviour, IInteractable
+public class ButtonInteractable : Interactable, IInteractable
 {
     CAIInteract cai;
     private void Start()

@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using System.Runtime.InteropServices.ComTypes;
 using UnityEngine;
 using UnityEngine.AI;
 
@@ -10,15 +11,22 @@ public class CAIInteract : MonoBehaviour
     // NavMeshAgent agent;
     CAIMovement movement;
     public GameObject pickUp;
+    private Transform caiMainBody;
 
+    [SerializeField]
+    private float maxHeight = 2f;
+    [SerializeField]
+    private float minHeight = 1f;
     [SerializeField]
     private float stoppingDistance = 1f;
     [SerializeField]
     GameObject pingPoint = null;
+
     private void Start()
     {
         //agent = GetComponent<NavMeshAgent>();
         movement = GetComponent<CAIMovement>();
+        caiMainBody = transform.GetChild(0);
     }
 
     // Update is called once per frame
@@ -64,7 +72,9 @@ public class CAIInteract : MonoBehaviour
                     //agent.SetDestination(point);
                     break;
                 case PingType.Interact:
-                    movement.SetTarget(obj.transform);
+                    //All Shitty ATM
+                    movement.SetTarget(obj.GetComponent<Interactable>().GetInteractionPoint());
+                    StartCoroutine(CorrectHeight(obj.GetComponent<Interactable>().GetInteractionPoint()));
                     //agent.SetDestination(point);
                     Debug.Log("Interact with " + obj.name);
                     StartCoroutine(InteractWith(obj));
@@ -109,6 +119,24 @@ public class CAIInteract : MonoBehaviour
             pickUp.transform.position = point;
             pickUp = null;
         }
+    }
+    IEnumerator CorrectHeight(Transform point)
+    {
+        float start = caiMainBody.position.y;
+
+        float count = 0;
+
+        while(count < 1)
+        {
+            caiMainBody.transform.position = Vector3.Lerp(new Vector3(caiMainBody.position.x, start, caiMainBody.position.z),
+                new Vector3(caiMainBody.position.x, point.position.y, caiMainBody.position.z),
+                count);
+            count += Time.deltaTime;
+            yield return null;
+        }
+
+        //Vector3 endPoint = obj.transform.position.y > maxHeight ? new Vector3(obj.transform.position.x, maxHeight);
+        yield return null;
     }
 
 }

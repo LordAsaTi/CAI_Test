@@ -7,7 +7,7 @@ public class CAIMovement : MonoBehaviour
 {
     private IAstarAI ai;
 
-    public bool followPlayer;
+    private bool followPlayer;
     private GameObject player;
 
     [SerializeField]
@@ -59,15 +59,18 @@ public class CAIMovement : MonoBehaviour
             }
             else
             {
-                ai.destination = followTarget ? target.position : destination;
+                //ignoring Height ATM
+                ai.destination = followTarget ? new Vector3(target.position.x,ai.position.y,target.position.z ): destination;
 
             }
-            if(GetRemainingDistanceHeightless() < 1f)
+            if(ai.reachedDestination)
             {
                 //To fast atm...
+                /*
                 Debug.Log("fix");
                 if (!heightChangeActive)
-                    StartCoroutine(CorrectHeight(startHeight));
+                    StartCoroutine(ResetHeight());
+                    */
             }
         }
     }
@@ -76,6 +79,10 @@ public class CAIMovement : MonoBehaviour
         ai.isStopped = true;
         //stop velocity
         
+    }
+    public bool ReachedDestination()
+    {
+        return ai.reachedDestination;
     }
     public float GetRemainingDistance()
     {
@@ -90,11 +97,34 @@ public class CAIMovement : MonoBehaviour
         return Vector3.Distance(posi,end);
     }
 
+    private IEnumerator ResetHeight()
+    {
+        heightChangeActive = true;
+        //yield return new WaitForSeconds(3f);
+        float count = 0;
+        float start = caiMainBody.position.y;
+
+        while (count < 1)
+        {
+            caiMainBody.transform.position = Vector3.Lerp(new Vector3(caiMainBody.position.x, start, caiMainBody.position.z),
+                new Vector3(caiMainBody.position.x, startHeight, caiMainBody.position.z),
+                count);
+            count += Time.deltaTime;
+            yield return null;
+        }
+        heightChangeActive = false;
+    }
     private IEnumerator CorrectHeight(float height)
     {
         heightChangeActive = true;
+
+        //GetTime to get Position - GetTime to get to height;
+        while(GetRemainingDistanceHeightless() > 5)
+        {
+            yield return null;
+        }
         //still need a better way... Reset other Method?
-        yield return new WaitForSeconds(1f);
+        //yield return new WaitForSeconds(1f);
         float start = caiMainBody.position.y;
 
         height = Mathf.Clamp(height, minHeight, maxHeight);
@@ -121,23 +151,33 @@ public class CAIMovement : MonoBehaviour
         Debug.Log("Destination Set");
         if (lastInteractive != null && lastInteractive.GetComponentInParent<MeshHighlighter>())
             lastInteractive.GetComponentInParent<MeshHighlighter>().CAIHighlight(false);
+        StartCoroutine(ResetHeight());
     }
     public void SetTarget(Transform targetpoint)
     {
         target = targetpoint;
-        Debug.Log(targetpoint.name);
 
+        //Interaction Point is a child of the Interactable
         if (lastInteractive != null && lastInteractive.GetComponentInParent<MeshHighlighter>())
             lastInteractive.GetComponentInParent<MeshHighlighter>().CAIHighlight(false);
         if(target.GetComponentInParent<MeshHighlighter>())
             target.GetComponentInParent<MeshHighlighter>().CAIHighlight(true);
-
         lastInteractive = target;
+
         followTarget = true;
         Debug.Log("Target Set");
         StartCoroutine(CorrectHeight(targetpoint.position.y));
     }
     #endregion
-
+    public void FollowPlayer(bool follow)
+    {
+        followPlayer = follow;
+        if (follow)
+        {
+            if (lastInteractive != null && lastInteractive.GetComponentInParent<MeshHighlighter>())
+                lastInteractive.GetComponentInParent<MeshHighlighter>().CAIHighlight(false);
+            StartCoroutine(CorrectHeight(player.transform.position.y));
+        }
+    }
 
 }

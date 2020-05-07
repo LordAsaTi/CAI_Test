@@ -15,12 +15,13 @@ public class CAIInteract : MonoBehaviour
     [SerializeField]
     private float stoppingDistance = 1f;
     [SerializeField]
-    GameObject pingPoint = null;
+    PingPoint pingPoint = null;
 
     private void Start()
     {
         //agent = GetComponent<NavMeshAgent>();
         movement = GetComponent<CAIMovement>();
+
     }
 
     // Update is called once per frame
@@ -28,18 +29,19 @@ public class CAIInteract : MonoBehaviour
     {
         if (Input.GetMouseButtonDown(0))
         {
-            movement.followPlayer = false;
+            movement.FollowPlayer(false);
             Ray ray = Camera.main.ViewportPointToRay(rayOrigin);
             RaycastHit hit;
             if(Physics.Raycast(ray, out hit, rayLength))
             {
-                pingPoint.transform.position = hit.point;
+                if(pingPoint)
+                    pingPoint.SetPoint(hit.point);
                 Ping(hit.point, hit.collider.gameObject);
             }
         }
         if (Input.GetMouseButtonDown(1))
         {
-            movement.followPlayer = true;
+            movement.FollowPlayer(true);
         }
     }
     private void Ping(Vector3 point, GameObject obj)
@@ -79,6 +81,7 @@ public class CAIInteract : MonoBehaviour
                     break;
                 case PingType.Enemy:
                     movement.SetTarget(obj.transform);
+                    StartCoroutine(EnemyInteract(obj));
                     break;
             }
 
@@ -88,16 +91,18 @@ public class CAIInteract : MonoBehaviour
     IEnumerator EnemyInteract(GameObject enemy)
     {
         yield return null;
-        while(movement.GetRemainingDistance() > stoppingDistance)
+        while(!movement.ReachedDestination())
         {
             yield return null;
         }
-        enemy.GetComponent<EnemyAStarPatrol>().Schock();
+        enemy.GetComponentInParent<EnemyAStarPatrol>().Schock();
+
+        movement.FollowPlayer(true);
     }
     IEnumerator InteractWith(GameObject obj)
     {
         yield return null;//Destination Update wait
-        while(movement.GetRemainingDistance() > stoppingDistance +3)
+        while(!movement.ReachedDestination())
         {
             yield return null;
         }

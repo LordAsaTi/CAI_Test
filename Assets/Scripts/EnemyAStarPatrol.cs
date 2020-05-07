@@ -160,7 +160,7 @@ public class EnemyAStarPatrol : MonoBehaviour
 	{
 		schocked = true;
 		ai.isStopped = true;
-
+		StartCoroutine(Schocked());
 	}
 	IEnumerator Schocked()
 	{

@@ -9,9 +9,9 @@ public class CAIMovement : MonoBehaviour
 
 
     [SerializeField]
-    private float maxHeight = 2f;
+    private float maxHeight = 3f;
     [SerializeField]
-    private float minHeight = 1f;
+    private float minHeight = 0.5f;
 
 
     private Transform caiMainBody;
@@ -79,21 +79,24 @@ public class CAIMovement : MonoBehaviour
     IEnumerator CorrectHeight(float height)
     {
         heightChangeActive = true;
+        //still need a better way... Reset other Method?
+        yield return new WaitForSeconds(1f);
         float start = caiMainBody.position.y;
 
+        height = Mathf.Clamp(height, minHeight, maxHeight);
         float count = 0;
 
         while (count < 1)
         {
             caiMainBody.transform.position = Vector3.Lerp(new Vector3(caiMainBody.position.x, start, caiMainBody.position.z),
-                new Vector3(caiMainBody.position.x, height, caiMainBody.position.z),
+                new Vector3(caiMainBody.position.x,  height, caiMainBody.position.z),
                 count);
             count += Time.deltaTime;
             yield return null;
         }
 
         //Vector3 endPoint = obj.transform.position.y > maxHeight ? new Vector3(obj.transform.position.x, maxHeight);
-        yield return new WaitForSeconds(1f);
+        
         heightChangeActive = false;
     }
     #region Setter

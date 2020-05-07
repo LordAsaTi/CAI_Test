@@ -28,6 +28,7 @@ public class CAIInteract : MonoBehaviour
     {
         if (Input.GetMouseButtonDown(0))
         {
+            movement.followPlayer = false;
             Ray ray = Camera.main.ViewportPointToRay(rayOrigin);
             RaycastHit hit;
             if(Physics.Raycast(ray, out hit, rayLength))
@@ -35,6 +36,10 @@ public class CAIInteract : MonoBehaviour
                 pingPoint.transform.position = hit.point;
                 Ping(hit.point, hit.collider.gameObject);
             }
+        }
+        if (Input.GetMouseButtonDown(1))
+        {
+            movement.followPlayer = true;
         }
     }
     private void Ping(Vector3 point, GameObject obj)

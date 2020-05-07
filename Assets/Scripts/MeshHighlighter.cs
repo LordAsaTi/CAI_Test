@@ -9,15 +9,23 @@ public class MeshHighlighter : MonoBehaviour
     private Material oldMat;
     [SerializeField]
     private Material highlightMat;
+
+    private bool keepHighlighted;
+
+    public void CAIHighlight(bool on)
+    {
+        EnableHighlight(on);
+        keepHighlighted = on;
+    }
     void Start()
     {
         meshRenderer = GetComponent<MeshRenderer>();
         oldMat = meshRenderer.material;
     }
 
-    public void EnableHighlight(bool on)
+    private void EnableHighlight(bool on)
     {
-        if(highlightMat!= null)
+        if(highlightMat!= null)// && !keepHighlighted)
         {
             meshRenderer.material = on ? highlightMat : oldMat;
         }
@@ -29,6 +37,7 @@ public class MeshHighlighter : MonoBehaviour
     }
     private void OnMouseExit()
     {
-        EnableHighlight(false);
+        if(!keepHighlighted)
+            EnableHighlight(false);
     }
 }

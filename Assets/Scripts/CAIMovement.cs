@@ -7,6 +7,8 @@ public class CAIMovement : MonoBehaviour
 {
     private IAstarAI ai;
 
+    public bool followPlayer;
+    private GameObject player;
 
     [SerializeField]
     private float maxHeight = 3f;
@@ -22,6 +24,8 @@ public class CAIMovement : MonoBehaviour
     private Vector3 destination;// { private get; set; }
     public bool followTarget;
 
+    private Transform lastInteractive = null;
+
     #region EnDisAble
     private void OnEnable()
     {
@@ -34,6 +38,7 @@ public class CAIMovement : MonoBehaviour
 
         caiMainBody = transform.GetChild(0);
         startHeight = caiMainBody.position.y;
+        player = FindObjectOfType<Player>().gameObject;
     }
     private void OnDisable()
     {
@@ -47,7 +52,16 @@ public class CAIMovement : MonoBehaviour
     {
         if(ai != null)
         {
-            ai.destination = followTarget ? target.position : destination;
+            //Timing to activate?
+            if (followPlayer)
+            {
+                ai.destination = player.transform.position - (player.transform.forward * 1.3f); //should work correctly in 3rdPerson
+            }
+            else
+            {
+                ai.destination = followTarget ? target.position : destination;
+
+            }
             if(GetRemainingDistanceHeightless() < 1f)
             {
                 //To fast atm...
@@ -76,7 +90,7 @@ public class CAIMovement : MonoBehaviour
         return Vector3.Distance(posi,end);
     }
 
-    IEnumerator CorrectHeight(float height)
+    private IEnumerator CorrectHeight(float height)
     {
         heightChangeActive = true;
         //still need a better way... Reset other Method?
@@ -105,10 +119,20 @@ public class CAIMovement : MonoBehaviour
         destination = point;
         followTarget = false;
         Debug.Log("Destination Set");
+        if (lastInteractive != null && lastInteractive.GetComponentInParent<MeshHighlighter>())
+            lastInteractive.GetComponentInParent<MeshHighlighter>().CAIHighlight(false);
     }
     public void SetTarget(Transform targetpoint)
     {
         target = targetpoint;
+        Debug.Log(targetpoint.name);
+
+        if (lastInteractive != null && lastInteractive.GetComponentInParent<MeshHighlighter>())
+            lastInteractive.GetComponentInParent<MeshHighlighter>().CAIHighlight(false);
+        if(target.GetComponentInParent<MeshHighlighter>())
+            target.GetComponentInParent<MeshHighlighter>().CAIHighlight(true);
+
+        lastInteractive = target;
         followTarget = true;
         Debug.Log("Target Set");
         StartCoroutine(CorrectHeight(targetpoint.position.y));

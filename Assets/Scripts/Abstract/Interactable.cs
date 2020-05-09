@@ -7,7 +7,7 @@ public abstract class Interactable : MonoBehaviour
     [SerializeField]
     Transform interactionPoint =  null;
 
-    public Transform GetInteractionPoint()
+    public virtual Transform GetInteractionPoint()
     {
         return interactionPoint != null ? interactionPoint : this.transform;
     }

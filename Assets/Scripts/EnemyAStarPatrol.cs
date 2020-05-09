@@ -63,7 +63,6 @@ public class EnemyAStarPatrol : MonoBehaviour
 					if (Vector3.Distance(ai.destination, transform.position) > 1f)
 					{
 						ai.destination = waypoints[index].position;
-						Debug.Log(Vector3.Distance(ai.destination, transform.position));
 					}
 					else
 					{
@@ -94,6 +93,10 @@ public class EnemyAStarPatrol : MonoBehaviour
 						LookAroundStart();
 				}
 				*/
+			}
+			if (playerSeen)
+			{
+				ai.destination = fOVDetection.player.position;
 			}
 		}
 		
@@ -158,6 +161,7 @@ public class EnemyAStarPatrol : MonoBehaviour
 	}
 	public void Schock()
 	{
+		Debug.Log("SCHOCKED");
 		schocked = true;
 		ai.isStopped = true;
 		StartCoroutine(Schocked());

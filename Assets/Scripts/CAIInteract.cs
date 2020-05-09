@@ -74,7 +74,10 @@ public class CAIInteract : MonoBehaviour
                     break;
                 case PingType.Interact:
                     //All Shitty ATM
-                    movement.SetTarget(obj.GetComponent<Interactable>().GetInteractionPoint());
+                    if (obj.GetComponent<Interactable>())
+                        movement.SetTarget(obj.GetComponent<Interactable>().GetInteractionPoint());
+                    else
+                        movement.SetDestination(point);
                     //agent.SetDestination(point);
                     Debug.Log("Interact with " + obj.name);
                     StartCoroutine(InteractWith(obj));
@@ -106,6 +109,7 @@ public class CAIInteract : MonoBehaviour
         {
             yield return null;
         }
+        Debug.Log("Real Interact with " + obj.name);
         obj.GetComponent<IInteractable>().Interact();
     }
     IEnumerator InteractWithWhile(GameObject obj, Vector3 point)
